@@ -6,4 +6,4 @@ spring:
     password: root
   liquibase:
     enabled: true
-tables: film,category,film_category
+tables: film,category,film_category,actor,film_actor,inventory,rental,payment

@@ -34,9 +34,6 @@ class QueryGeneratorService(private val llm: LlmClient, private val tableIntrosp
         return """
 Schema for table: ${table.name}
 ${table.columns.joinToString("\n") { "  ${it.name} ${it.type}" }}
-
-Data for table: ${table.name}:
-${table.sampleData.joinToString("\n") { "  " + it.joinToString("\t") }}
         """
     }
 
@@ -46,11 +43,11 @@ ${table.sampleData.joinToString("\n") { "  " + it.joinToString("\t") }}
         val prompt = """
 $tableSummaries
 
-As a senior analyst, given the above schemas and data, write a detailed and correct Postgres sql query to answer the analytical question:
+Given the above schemas, write a detailed and correct Postgres sql query to answer the analytical question:
 
 "$question"
 
-The query should prefer names over ids. Comment the query with your logic.
+The query should prefer names over ids. Return only the query.
         """.trimIndent()
         return CompletionRequest.builder()
             .prompt(prompt)

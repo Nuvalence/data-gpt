@@ -23,10 +23,7 @@ class TableIntrospectionService(
             """, table).map { row ->
                 Column(row["column_name"] as String, row["data_type"] as String)
             }
-            val columnNames = columns.joinToString(", ") { it.name }
-            val sampleData = jdbcTemplate.queryForList("SELECT $columnNames FROM $table LIMIT 3")
-                .map { it.values.toList() }
-            Table(table, columns, sampleData)
+            Table(table, columns)
         }
     }
 

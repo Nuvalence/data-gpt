@@ -31,7 +31,10 @@ class QuestionAnswerService(
         return if (bestQuery.result != null) {
             if (bestQuery.result!!.size > 1) {
                 Answer(question, "Here are the results I found.", mapper.valueToTree(bestQuery.result), bestQuery.sql)
-            } else {
+            } else if (bestQuery.result!!.isEmpty()) {
+                Answer(question, "I couldn't find any results.", mapper.valueToTree(bestQuery.result), bestQuery.sql)
+            }
+            else {
                 val summary = summarizeResult(question, bestQuery.result!!)
                 Answer(question, summary, mapper.valueToTree(bestQuery.result), bestQuery.sql)
             }
