@@ -57,8 +57,6 @@ Which will return a response similar to the following:
 }
 ```
 
-At the moment, the only supported tables are `category`, `film`, `actor`, `inventory`, `rental` and `payment`.
-
 ## Data Preview
 `category`:
 ```
