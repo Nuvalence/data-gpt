@@ -18,6 +18,12 @@ Building is done using Gradle. To build, run the following command:
 To run this project, you will need to have the following installed:
 - Docker Compose
 
+You will also need to create an account on [OpenAI](https://openai.com/) and create an [API key](https://platform.openai.com/account/api-keys).
+Export the API key as an environment variable named `OPENAI_API_KEY`:
+```bash
+export OPENAI_API_KEY="sk-..."
+```
+
 Running is done using Docker Compose. To run, run the following command:
 ```bash
 docker-compose up --build

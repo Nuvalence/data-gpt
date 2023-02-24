@@ -6,6 +6,4 @@ spring:
     password: root
   liquibase:
     enabled: true
-openai:
-  api-key: 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
 tables: film,category,film_category
