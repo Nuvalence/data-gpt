@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  data-gpt-postgres:
+    image: 'postgres:14-alpine'
+    ports:
+      - "5432:5432"
+    container_name: data-gpt-postgres
+    environment:
+      - POSTGRES_DB=datagpt
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - PGPORT=5432
+      - PGDATABASE=datagpt
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - data-gpt-network
+  data-gpt-server:
+    container_name: data-gpt-server
+    build:
+      dockerfile: Dockerfile
+    image: data-gpt-server:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - data-gpt-network
+    depends_on:
+      - data-gpt-postgres
+volumes:
+  db-data:
+    external: false
+networks:
+  data-gpt-network:
+    driver: bridge
