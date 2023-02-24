@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   data-gpt-postgres:
-    image: 'postgres:14-alpine'
+    image: 'postgres:14'
     ports:
       - "5432:5432"
     container_name: data-gpt-postgres
