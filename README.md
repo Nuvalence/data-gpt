@@ -46,14 +46,15 @@ Which will return a response similar to the following:
 ```json
 {
   "question": "Which film category was the most popular?",
-  "answer": "Sports was the most popular film category, with a count of 74.",
+  "answer": "Sports was the most popular film category, with 74 films.",
   "result": [
     {
-      "category": "Sports",
-      "count": 74
+      "category_name": "Sports",
+      "num_films": 74
     }
   ],
-  "bestQuery": "\nSELECT c.name AS category, COUNT(fc.category_id) AS count\nFROM category c\nINNER JOIN film_category fc\n    ON c.category_id = fc.category_id\nGROUP BY c.name\nORDER BY count DESC\nLIMIT 1;"
+  "bestQuery": "SELECT c.name AS category_name, COUNT(*) AS num_films\nFROM film_category fc\nJOIN category c\n  ON fc.category_id = c.category_id\nGROUP BY c.name\nORDER BY num_films DESC\nLIMIT 1;",
+  "bestQueryExplanation": "The Postgres SQL query above is used to determine which film category was the most popular. This is done by joining the film_category and category tables to get the category names, and then doing a count of the number of films in each category. The result is then ordered by the number of films and limited to the top result. This query will return the most popular film category, as well as the number of films associated with it."
 }
 ```
 
