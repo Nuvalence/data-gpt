@@ -58,6 +58,23 @@ Which will return a response similar to the following:
 }
 ```
 
+Or perhaps you want to know which actor had the largest change in film rentals in the database:
+```json
+{
+  "question": "Which actor had the largest change year over year in film rentals between 2005 vs 2006?",
+  "answer": "Gina DeGeneres had the largest change year over year in film rentals between 2005 vs 2006, with a difference of 731.",
+  "result": [
+    {
+      "first_name": "GINA",
+      "last_name": "DEGENERES",
+      "difference": 731
+    }
+  ],
+  "bestQuery": "\n\nSELECT actor.first_name, actor.last_name,\n\t(COUNT(CASE WHEN EXTRACT(YEAR FROM rental.rental_date) = 2005 THEN 1 ELSE NULL END) - \n\tCOUNT(CASE WHEN EXTRACT(YEAR FROM rental.rental_date) = 2006 THEN 1 ELSE NULL END)) AS difference\nFROM actor\nJOIN film_actor ON actor.actor_id = film_actor.actor_id\nJOIN film ON film_actor.film_id = film.film_id\nJOIN inventory ON film.film_id = inventory.film_id\nJOIN rental ON inventory.inventory_id = rental.inventory_id\nGROUP BY actor.actor_id, actor.first_name, actor.last_name\nORDER BY difference DESC\nLIMIT 1;",
+  "bestQueryExplanation": "The above query counts how many film rentals each actor had in 2005 and 2006, and then subtracts the two numbers to find the difference in rentals between the two years. The query is then ordered in descending order by the difference in rentals and the top result is then returned. This allows us to find out which actor had the largest change year over year in film rentals between 2005 and 2006. \n\nThe query first selects the actor's first and last name from the actor table. It then joins the actor table to the film_actor table, the film table, the inventory table, and the rental table in order to get the rental data of each actor. \n\nThen, it uses a COUNT function to count how many rentals each actor had in 2005 and in 2006. Finally, the query subtracts the 2005 rentals from the 2006 rentals and orders the results in descending order. The top result is then returned."
+}
+```
+
 ## Data Preview
 `category`:
 ```
