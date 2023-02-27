@@ -8,6 +8,7 @@ data class Answer(
     val answer: String? = null,
     val result: JsonNode? = null,
     val bestQuery: String? = null,
+    val bestQueryExplanation: String? = null,
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val error: String? = null

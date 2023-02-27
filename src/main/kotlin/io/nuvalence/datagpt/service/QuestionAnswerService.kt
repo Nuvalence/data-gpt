@@ -30,18 +30,19 @@ class QuestionAnswerService(
             .filter { it.error != null || (it.result != null && it.result!!.isEmpty()) }
             .forEach { fixQuery(it) }
         val bestQuery = findBestQuery(queries)
+        val bestQueryExplanation = explainQuery(bestQuery, question)
         return if (bestQuery.result != null) {
             if (bestQuery.result!!.size > 1) {
-                Answer(question, "Here are the results I found.", mapper.valueToTree(bestQuery.result), bestQuery.sql)
+                Answer(question, "Here are the results I found.", mapper.valueToTree(bestQuery.result), bestQuery.sql, bestQueryExplanation)
             } else if (bestQuery.result!!.isEmpty()) {
-                Answer(question, "I couldn't find any results.", mapper.valueToTree(bestQuery.result), bestQuery.sql)
+                Answer(question, "I couldn't find any results.", mapper.valueToTree(bestQuery.result), bestQuery.sql, bestQueryExplanation)
             }
             else {
                 val summary = summarizeResult(question, bestQuery.result!!)
-                Answer(question, summary, mapper.valueToTree(bestQuery.result), bestQuery.sql)
+                Answer(question, summary, mapper.valueToTree(bestQuery.result), bestQuery.sql, bestQueryExplanation)
             }
         } else {
-            Answer(question, bestQuery = bestQuery.sql, error = bestQuery.error)
+            Answer(question, bestQuery = bestQuery.sql, error = bestQuery.error, bestQueryExplanation = bestQueryExplanation)
         }
     }
 
@@ -121,6 +122,25 @@ class QuestionAnswerService(
             .maxTokens(500)
             .temperature(0.8)
             .build()).choices.first().text.trim()
+    }
+
+    private fun explainQuery(query: Query, question: String): String {
+        log.info("Explaining query {}", query)
+        val prompt = """
+            ${query.sql}
+            
+            The above Postgres SQL query was used to answer the following question:
+            
+            "$question"
+            
+            As a senior data analyst, explain the Postgres SQL query above.
+        """.trimIndent()
+        return llm.sendCompletionRequest(CompletionRequest.builder()
+            .prompt(prompt)
+            .model(openAiProperties.model)
+            .maxTokens(500)
+            .temperature(0.8)
+            .build()).choices.first().text
     }
 
 }
