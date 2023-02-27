@@ -2,13 +2,17 @@ package io.nuvalence.datagpt.service
 
 import com.theokanning.openai.completion.CompletionRequest
 import io.nuvalence.datagpt.client.LlmClient
+import io.nuvalence.datagpt.config.OpenAiProperties
 import io.nuvalence.datagpt.domain.Query
 import io.nuvalence.datagpt.domain.Table
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class QueryGeneratorService(private val llm: LlmClient, private val tableIntrospectionService: TableIntrospectionService) {
+class QueryGeneratorService(
+    private val llm: LlmClient,
+    private val tableIntrospectionService: TableIntrospectionService,
+    private val openAiProperties: OpenAiProperties) {
 
     companion object {
         private val log = LoggerFactory.getLogger(QueryGeneratorService::class.java)
@@ -51,7 +55,7 @@ The query should prefer names over ids. Return only the query.
         """.trimIndent()
         return CompletionRequest.builder()
             .prompt(prompt)
-            .model("text-davinci-003")
+            .model(openAiProperties.model)
             .maxTokens(500)
             .temperature(0.75)
             .n(3)
@@ -74,7 +78,7 @@ Return only the query.
         """.trimIndent()
         return CompletionRequest.builder()
             .prompt(prompt)
-            .model("text-davinci-003")
+            .model(openAiProperties.model)
             .maxTokens(500)
             .temperature(0.8)
             .build()

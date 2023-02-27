@@ -3,6 +3,7 @@ package io.nuvalence.datagpt.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.theokanning.openai.completion.CompletionRequest
 import io.nuvalence.datagpt.client.LlmClient
+import io.nuvalence.datagpt.config.OpenAiProperties
 import io.nuvalence.datagpt.domain.Answer
 import io.nuvalence.datagpt.domain.Query
 import org.apache.commons.lang3.exception.ExceptionUtils
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 class QuestionAnswerService(
     private val queryGeneratorService: QueryGeneratorService,
     private val llm: LlmClient,
+    private val openAiProperties: OpenAiProperties,
     private val jdbcTemplate: JdbcTemplate,
     private val mapper: ObjectMapper) {
 
@@ -46,13 +48,13 @@ class QuestionAnswerService(
     private fun findBestQuery(queries: List<Query>): Query {
         for (q1 in queries) {
             for (q2 in queries) {
-                if (q1.result != null && q1.result!!.size == q2.result?.size) {
+                if (q1.result != null && q1.result!!.isNotEmpty() && q1.result!!.size == q2.result?.size) {
                     return q1
                 }
             }
         }
         for (query in queries) {
-            if (query.result != null) {
+            if (query.result != null && query.result!!.isNotEmpty()) {
                 return query
             }
         }
@@ -93,7 +95,7 @@ class QuestionAnswerService(
         }
         val sql = llm.sendCompletionRequest(CompletionRequest.builder()
             .prompt(prompt)
-            .model("text-davinci-003")
+            .model(openAiProperties.model)
             .maxTokens(500)
             .temperature(0.8)
             .build()).choices.first().text
@@ -108,14 +110,14 @@ class QuestionAnswerService(
         val prompt = """
             ${mapper.writeValueAsString(result)}
             
-            Given the above JSON, provide a direct answer to the following question with any related details:
+            Given the above result, provide a direct answer to the following question with any related details:
             
             $question
         """.trimIndent()
 
         return llm.sendCompletionRequest(CompletionRequest.builder()
             .prompt(prompt)
-            .model("text-davinci-003")
+            .model(openAiProperties.model)
             .maxTokens(500)
             .temperature(0.8)
             .build()).choices.first().text.trim()
