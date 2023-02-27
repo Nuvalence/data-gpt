@@ -140,7 +140,7 @@ class QuestionAnswerService(
             .model(openAiProperties.model)
             .maxTokens(500)
             .temperature(0.8)
-            .build()).choices.first().text
+            .build()).choices.first().text.trim()
     }
 
 }

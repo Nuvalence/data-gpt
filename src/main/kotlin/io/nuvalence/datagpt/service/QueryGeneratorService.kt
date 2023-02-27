@@ -5,7 +5,6 @@ import io.nuvalence.datagpt.client.LlmClient
 import io.nuvalence.datagpt.config.OpenAiProperties
 import io.nuvalence.datagpt.domain.Query
 import io.nuvalence.datagpt.domain.Table
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,24 +13,10 @@ class QueryGeneratorService(
     private val tableIntrospectionService: TableIntrospectionService,
     private val openAiProperties: OpenAiProperties) {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(QueryGeneratorService::class.java)
-    }
-
     fun generateQuery(question: String): List<Query> {
         val request = createCompletionRequestForQuestion(question)
         return llm.sendCompletionRequest(request).choices
-            .map { it.text }
-            .map { sql ->
-                val doubleCheckRequest = createCompletionRequestForQueryCheck(sql)
-                val checkedSql = llm.sendCompletionRequest(doubleCheckRequest).choices.first().text
-                if (sql == checkedSql) {
-                    Query(sql)
-                } else {
-                    log.info("Original query was sanitized by OpenAI: {} -> {}", sql, checkedSql)
-                    Query(checkedSql)
-                }
-            }
+            .map { Query(it.text) }
     }
 
     private fun schemaSummaryForTable(table: Table): String {
@@ -51,7 +36,12 @@ Given the above schemas, write a detailed and correct Postgres sql query to answ
 
 "$question"
 
-The query should prefer names over ids. Return only the query.
+The query should prefer names over ids. Return only the query. Avoid common Postgres query mistakes, including:
+ - Handling case sensitivity, e.g. using ILIKE instead of LIKE
+ - Ensuring the join columns are correct
+ - Casting values to the appropriate type
+ - Properly quoting identifiers
+ - Coalescing null values
         """.trimIndent()
         return CompletionRequest.builder()
             .prompt(prompt)
@@ -59,28 +49,6 @@ The query should prefer names over ids. Return only the query.
             .maxTokens(500)
             .temperature(0.75)
             .n(3)
-            .build()
-    }
-
-    private fun createCompletionRequestForQueryCheck(sql: String): CompletionRequest {
-        val prompt = """$sql
-            
-
-Double check the Postgres query above for common mistakes, including:
- - Handling case sensitivity, e.g. using ILIKE instead of LIKE
- - Ensuring the join columns are correct
- - Casting values to the appropriate type
- - Properly quoting identifiers
- 
-Rewrite the query below if there are any mistakes. If it looks good as it is, just return the original query.
-
-Return only the query.
-        """.trimIndent()
-        return CompletionRequest.builder()
-            .prompt(prompt)
-            .model(openAiProperties.model)
-            .maxTokens(500)
-            .temperature(0.8)
             .build()
     }
 
