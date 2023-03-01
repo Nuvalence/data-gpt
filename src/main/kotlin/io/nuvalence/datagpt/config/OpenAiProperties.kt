@@ -5,4 +5,4 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConfigurationProperties(prefix = "openai")
 @ConstructorBinding
-data class OpenAiProperties(val apiKey: String, val model: String)
+data class OpenAiProperties(val baseUrl: String = "https://api.openai.com/v1", val apiKey: String, val model: String)

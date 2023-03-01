@@ -1,10 +1,11 @@
 package io.nuvalence.datagpt.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.theokanning.openai.completion.CompletionRequest
-import io.nuvalence.datagpt.client.LlmClient
+import io.nuvalence.datagpt.client.OpenAiClient
 import io.nuvalence.datagpt.config.OpenAiProperties
 import io.nuvalence.datagpt.domain.Answer
+import io.nuvalence.datagpt.domain.ChatCompletionRequest
+import io.nuvalence.datagpt.domain.ChatMessage
 import io.nuvalence.datagpt.domain.Query
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.slf4j.LoggerFactory
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service
 @Service
 class QuestionAnswerService(
     private val queryGeneratorService: QueryGeneratorService,
-    private val llm: LlmClient,
+    private val openAiClient: OpenAiClient,
     private val openAiProperties: OpenAiProperties,
     private val jdbcTemplate: JdbcTemplate,
     private val mapper: ObjectMapper) {
@@ -83,7 +84,7 @@ class QuestionAnswerService(
                 
                 ${query.error}
                 
-                Rewrite the Postgres sql query with the error fixed. Return only the query.
+                Rewrite the Postgres sql query with the error fixed. Return only the query. Do not include an explanation.
             """.trimIndent()
         } else {
             """
@@ -91,15 +92,16 @@ class QuestionAnswerService(
                 
                 The Postgres query above produced no result. Try rewriting the query so it returns a result.
                 
-                Return only the query.
+                Return only the query. Do not include an explanation.
             """.trimIndent()
         }
-        val sql = llm.sendCompletionRequest(CompletionRequest.builder()
-            .prompt(prompt)
-            .model(openAiProperties.model)
-            .maxTokens(500)
-            .temperature(0.8)
-            .build()).choices.first().text
+        val sql = openAiClient.sendChatCompletionRequest(
+            ChatCompletionRequest(
+                model = openAiProperties.model,
+                messages = listOf(ChatMessage("user", prompt)),
+                maxTokens = 500,
+                temperature = 0.8
+            )).choices.first().message.content
         log.info("Fixed query: {} -> {}", query.sql, sql)
         query.sql = sql
         query.error = null
@@ -116,12 +118,13 @@ class QuestionAnswerService(
             $question
         """.trimIndent()
 
-        return llm.sendCompletionRequest(CompletionRequest.builder()
-            .prompt(prompt)
-            .model(openAiProperties.model)
-            .maxTokens(500)
-            .temperature(0.8)
-            .build()).choices.first().text.trim()
+        return openAiClient.sendChatCompletionRequest(
+            ChatCompletionRequest(
+                model = openAiProperties.model,
+                messages = listOf(ChatMessage("user", prompt)),
+                maxTokens = 500,
+                temperature = 0.8
+            )).choices.first().message.content.trim()
     }
 
     private fun explainQuery(query: Query, question: String): String {
@@ -135,12 +138,13 @@ class QuestionAnswerService(
             
             As a senior data analyst, explain the Postgres SQL query above.
         """.trimIndent()
-        return llm.sendCompletionRequest(CompletionRequest.builder()
-            .prompt(prompt)
-            .model(openAiProperties.model)
-            .maxTokens(500)
-            .temperature(0.8)
-            .build()).choices.first().text.trim()
+        return openAiClient.sendChatCompletionRequest(
+            ChatCompletionRequest(
+                model = openAiProperties.model,
+                messages = listOf(ChatMessage("user", prompt)),
+                maxTokens = 500,
+                temperature = 0.8
+            )).choices.first().message.content.trim()
     }
 
 }

@@ -8,4 +8,4 @@ spring:
     enabled: true
 tables: film,category,film_category,actor,film_actor,inventory,rental,payment,staff,customer,store,address,city,country,language
 openai:
-  model: text-davinci-003
+  model: gpt-3.5-turbo
