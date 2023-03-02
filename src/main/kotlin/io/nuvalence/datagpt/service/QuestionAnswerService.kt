@@ -113,9 +113,11 @@ class QuestionAnswerService(
         val prompt = """
             ${mapper.writeValueAsString(result)}
             
-            Given the above result, provide a direct answer to the following question with any related details:
+            The result above is the raw data returned that answered the following question:
             
             $question
+            
+            Summarize the result above in a way that answers the question above.
         """.trimIndent()
 
         return openAiClient.sendChatCompletionRequest(
@@ -136,7 +138,7 @@ class QuestionAnswerService(
             
             "$question"
             
-            As a senior data analyst, explain the Postgres SQL query above.
+            As a junior data analyst, explain the Postgres SQL query above.
         """.trimIndent()
         return openAiClient.sendChatCompletionRequest(
             ChatCompletionRequest(
