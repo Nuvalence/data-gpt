@@ -39,6 +39,8 @@ Given the above schemas, write a detailed and correct Postgres sql query to answ
 "$question"
 
 The query should prefer names over ids. Return only the query. Do not include an explanation. Avoid common Postgres query mistakes, including:
+ - Prefer ILIKE over exact matches
+ - Prefer NOT ILIKE over negated exact matches
  - Handling case sensitivity, e.g. using ILIKE instead of LIKE
  - Ensuring the join columns are correct
  - Casting values to the appropriate type

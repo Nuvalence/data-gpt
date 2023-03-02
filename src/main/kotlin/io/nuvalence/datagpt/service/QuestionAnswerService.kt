@@ -33,7 +33,7 @@ class QuestionAnswerService(
         val bestQuery = findBestQuery(queries)
         val bestQueryExplanation = explainQuery(bestQuery, question)
         return if (bestQuery.result != null) {
-            if (bestQuery.result!!.size > 1) {
+            if (bestQuery.result!!.size > 10) {
                 Answer(question, "Here are the results I found.", mapper.valueToTree(bestQuery.result), bestQuery.sql, bestQueryExplanation)
             } else if (bestQuery.result!!.isEmpty()) {
                 Answer(question, "I couldn't find any results.", mapper.valueToTree(bestQuery.result), bestQuery.sql, bestQueryExplanation)
@@ -113,11 +113,11 @@ class QuestionAnswerService(
         val prompt = """
             ${mapper.writeValueAsString(result)}
             
-            The result above is the raw data returned that answered the following question:
+            The result above is the raw data returned that directly answered the following question:
             
             $question
             
-            Summarize the result above in a way that answers the question above.
+            Summarize this result in a way as it pertains to the question.
         """.trimIndent()
 
         return openAiClient.sendChatCompletionRequest(
