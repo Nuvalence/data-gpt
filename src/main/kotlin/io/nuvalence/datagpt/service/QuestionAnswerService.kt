@@ -117,7 +117,8 @@ class QuestionAnswerService(
             
             $question
             
-            Summarize this result in a way as it pertains to the question.
+            Summarize this result in a way as it pertains to the question. Be as direct as possible.
+            If the result is a table, summarize the table. If the result is a list of values, summarize the list.
         """.trimIndent()
 
         return openAiClient.sendChatCompletionRequest(
