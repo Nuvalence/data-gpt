@@ -75,6 +75,16 @@ Or perhaps you want to know which actor had the largest change in film rentals i
 }
 ```
 
+You can also tailor the query explanation using different personas. For example, as a senior data analyst, you would use:
+```bash
+curl -s -X POST 'http://localhost:8080/answer' \
+-H 'Content-Type: application/json' \
+--data '{
+    "question": "Find the top five actors who had the largest decrease year over year in film rentals between 2005 vs 2006.",
+    "persona": "senior data analyst"
+}'
+```
+
 ## Data Preview
 `category`:
 ```

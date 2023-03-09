@@ -12,7 +12,7 @@ class NaturalLanguageQuestionController(private val questionAnswerService: Quest
 
     @PostMapping("/answer")
     fun generateQuery(@RequestBody request: AnswerRequest): Answer {
-        return questionAnswerService.answerQuestion(request.question)
+        return questionAnswerService.answerQuestion(request.question, request.persona)
     }
 
 }

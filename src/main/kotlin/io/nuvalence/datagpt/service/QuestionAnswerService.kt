@@ -24,14 +24,14 @@ class QuestionAnswerService(
         private val log = LoggerFactory.getLogger(QuestionAnswerService::class.java)
     }
 
-    fun answerQuestion(question: String): Answer {
+    fun answerQuestion(question: String, persona: String?): Answer {
         val queries = queryGeneratorService.generateQuery(question)
         queries.forEach { fetchQueryResult(it) }
         queries
             .filter { it.error != null || (it.result != null && it.result!!.isEmpty()) }
             .forEach { fixQuery(it) }
         val bestQuery = findBestQuery(queries)
-        val bestQueryExplanation = explainQuery(bestQuery, question)
+        val bestQueryExplanation = explainQuery(bestQuery, question, persona)
         return if (bestQuery.result != null) {
             if (bestQuery.result!!.size > 10) {
                 Answer(question, "Here are the results I found.", mapper.valueToTree(bestQuery.result), bestQuery.sql, bestQueryExplanation)
@@ -130,7 +130,8 @@ class QuestionAnswerService(
             )).choices.first().message.content.trim()
     }
 
-    private fun explainQuery(query: Query, question: String): String {
+    private fun explainQuery(query: Query, question: String, persona: String?): String {
+        val summarizeAs = persona ?: "junior data analyst"
         log.info("Explaining query {}", query)
         val prompt = """
             ${query.sql}
@@ -139,7 +140,7 @@ class QuestionAnswerService(
             
             "$question"
             
-            As a junior data analyst, explain the Postgres SQL query above.
+            As a $summarizeAs, explain the Postgres SQL query above.
         """.trimIndent()
         return openAiClient.sendChatCompletionRequest(
             ChatCompletionRequest(
