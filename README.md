@@ -5,17 +5,8 @@ Using OpenAI / GPT-3 to crunch data
 Using natural language processing, this project aims to make data analysis easier.
 It is a work in progress, and is currently in the early stages of development.
 
-## Building
-To build this project, you will need to have the following installed:
-- Java JDK 11
-
-Building is done using Gradle. To build, run the following command:
-```bash
-./gradlew build
-```
-
-## Running
-To run this project, you will need to have the following installed:
+## Building and Running
+To build and run this project, you will need to have the following installed:
 - Docker Compose
 
 You will also need to create an account on [OpenAI](https://openai.com/) and create an [API key](https://platform.openai.com/account/api-keys).
@@ -79,10 +70,10 @@ You can also tailor the query explanation using different personas. For example,
 ```bash
 curl -s -X POST 'http://localhost:8080/answer' \
 -H 'Content-Type: application/json' \
---data '{
+-d '{
     "question": "Find the top five actors who had the largest decrease year over year in film rentals between 2005 vs 2006.",
     "persona": "senior data analyst"
-}'
+}' | jq
 ```
 
 ## Data Preview
