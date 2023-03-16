@@ -24,7 +24,7 @@ class QueryGeneratorService(
     private fun schemaSummaryForTable(table: Table): String {
         return """
 Schema for table: ${table.name}
-${table.columns.joinToString("\n") { "  ${it.name} ${it.type}" }}
+${table.columns.joinToString("\n") { "  ${it.name} ${it.type} ${it.foreignKey}" }}
         """
     }
 

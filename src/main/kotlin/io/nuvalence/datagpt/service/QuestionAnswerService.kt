@@ -119,6 +119,7 @@ class QuestionAnswerService(
             
             Summarize this result in a way as it pertains to the question. Be as direct as possible.
             If the result is a table, summarize the table. If the result is a list of values, summarize the list.
+            Include the values in the summarization.
         """.trimIndent()
 
         return openAiClient.sendChatCompletionRequest(
